@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <!-- 引入vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+    <div id="app" style="display: flex;justify-content: center;">
+        <el-card style="width: 1000px;">
+            <div style="margin-bottom: 15px; font-weight: 500; font-size: 20px;">购物车：</div>
+            <div v-if="books.length">
+                <el-table :data="books" style="width: 100%" border stripe>
+                    <el-table-column type="index"></el-table-column>
+                    <el-table-column prop="name" label="书籍名称"></el-table-column>
+                    <el-table-column prop="date" label="出版日期"></el-table-column>
+                    <el-table-column label="价格" width="180px">
+                        <template v-slot="scope">
+                            {{scope.row.price | showPrice()}}
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="count" label="购买数量" width="120px">
+                        <template v-slot="scope">
+                            <el-button ref="subRef" :disabled="scope.row.count === 1" size="mini" @click="subBtn(scope.row)">-</el-button>
+                            <span>{{scope.row.count}}</span>
+                            <el-button ref="addRef" size="mini" @click="addBtn(scope.row)">+</el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="80px">
+                        <template v-slot="scope">
+                            <el-button size="mini" @click="removeBtnById(scope.row.id)">移除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <div style="margin-top: 15px;">总价格：{{getTotalPrice | showPrice}}</div>
+            </div>
+            
+            <!-- 购物车为空显示 -->
+            <div v-else>购物车为空</div>
+        </el-card>
+    </div>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            books: [
+                {id: 0, name:'《算法导论》', date: '2006-9', price: 85, count: 1},
+                {id: 1, name:'《python》', date: '2004-10', price: 15, count: 1},
+                {id: 2, name:'《JS》', date: '2002-1', price: 41, count: 1},
+                {id: 3,name:'《代码大全》', date: '2012-8', price: 123, count: 1},
+            ],
+            totalPrice: 0,
+        },
+        computed: {
+            getTotalPrice() {
+                let totalPrice = 0;
+                // 1、普通for循环
+                // for(let i=0; i < this.books.length; i++){
+                //     totalPrice += this.books[i].price*this.books[i].count
+                // }
+
+                // 2、for(let i in this.books)
+                // for(let i in this.books) {
+                //     totalPrice += this.books[i].price*this.books[i].count
+                // }
+
+                // 2、for(let item of this.books)
+                // for(let item of this.books) {
+                //     totalPrice += item.price*item.count
+                // }
+
+                // 3、reduce((start, n) => start+n, initValue)
+                // totalPrice = this.books.reduce((start, item) => start.price*start.count+item.price*item.start)
+                totalPrice = this.books.reduce((start, book) => start+book.price * book.count, 0)
+
+                this.totalPrice = totalPrice
+                return totalPrice
+            }
+        },
+        filters: {
+            showPrice(price) {
+                return '¥' + Number(price).toFixed(2)
+            }
+        },
+        methods: {
+            addBtn(row) {
+                row.count++
+            },
+            subBtn(row) {
+                if(row.count !== 1) {
+                    row.count--
+                    return
+                }
+            },
+            removeBtnById(id) {
+                this.books.splice(id, 1)
+            }
+        }
+    })
+</script>  
+</body>
+</html>
